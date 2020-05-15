@@ -4,7 +4,11 @@ const port = 3000;
 
 // MongoDB
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/test', { useUnifiedTopology: true, useNewUrlParser: true });
+const mongoURL = fs.readFileSync(
+  path.resolve(__dirname, "../keys/mongo.key"),
+  "utf8"
+);
+mongoose.connect(mongoURL, { useUnifiedTopology: true, useNewUrlParser: true });
 
 
 const UserModel = require('./models/UserModel.js');

@@ -1,0 +1,35 @@
+version: '3'
+services:
+    node:
+        build: .
+        command: node src/index.js
+         volumes:
+            - .:/usr/app/
+            - /usr/app/node_modules
+        ports:
+            - "3000:3000"
+        depends_on:
+            - mongo
+            - redis
+    mongo:
+        image: mongo
+        container_name: mongo-db
+        volumes:
+            - data-volume:/data/db/mongo
+        ports:
+            - "27017-27019:27017-27019"
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: example
+
+    redis:
+        image: redis
+        container_name: redis-db
+        volumes:
+            -  redis-volume:/data/db/redis
+        ports:
+            - "6379:6379"
+volumes:
+    mongo-volume:
+    redis-volume:
