@@ -1,6 +1,11 @@
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const app = express();
 const port = 3000;
+
+const chalk = require("chalk");
+const info = chalk.rgb(0, 0, 0).bgBlue;
 
 // MongoDB
 const mongoose = require("mongoose");
@@ -18,6 +23,10 @@ mongoose.connect(mongoURL, {
   useNewUrlParser: true,
 });
 
+mongoose.connection.on("open", function () {
+  console.log(chalk.rgb(0, 0, 0).bgGreen("connected to mongodb"));
+});
+
 const UserModel = require("./models/UserModel.js");
 const MongooseRepository = require("./data/MongooseRepository.js");
 const UserRepo = new MongooseRepository({ Model: UserModel });
@@ -27,8 +36,8 @@ const UserRepo = new MongooseRepository({ Model: UserModel });
   users.forEach(async (user) => await UserRepo.remove(user));
 })();
 
-const rateCheck = require("./shared/ratelimiter");
-app.use(rateCheck);
+// const rateCheck = require("./shared/ratelimiter");
+// app.use(rateCheck);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -63,4 +72,4 @@ app.use("/auth", authRoutes);
 const userRoutes = require("./routes/user.js");
 app.use("/user", userRoutes);
 
-app.listen(port, async () => console.log(`Listening on *: ${port}`));
+app.listen(port, async () => console.log(info(`Listening on *: ${port}`)));
