@@ -1,5 +1,5 @@
 {
-  "name": "NodeMongoose",
+  "name": "node-jwt-mongoose-redis",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,8 +11,21 @@
     "pm-clean": "pm2 delete 0",
     "dev": "npx supervisor src/index.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "redis",
+    "mongo",
+    "mongodb",
+    "node",
+    "nodejs",
+    "express",
+    "jwt",
+    "auth",
+    "ratelimiter"
+  ],
+  "author": {
+    "name":"Nergy101, Christian van Dijk",
+    "email": "chrisdvd@live.nl"
+  },
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^4.0.1",
