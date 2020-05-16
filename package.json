@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run pm-start && npm run pm-logs",
+    "pm-start": "pm2 start src/index.js",
+    "pm-stop": "pm2 stop 0",
+    "pm-logs": "pm2 logs",
+    "pm-clean": "pm2 delete 0",
+    "dev": "npx supervisor src/index.js"
   },
   "keywords": [],
   "author": "",
