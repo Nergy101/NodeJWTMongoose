@@ -1,14 +1,10 @@
 const express = require('express')
 const router = express.Router()
 
-const fs = require('fs');
-const path = require("path");
-
 const bcrypt = require('bcrypt');
 const saltRounds = 15;
 
 // JWT
-const jwt = require('jsonwebtoken');
 const { verifyToken, generateRefreshToken, generateJWT } = require('../shared/auth.js');
 
 const UserModel = require('../models/UserModel.js');
@@ -18,14 +14,15 @@ const UserRepo = new MongooseRepository({ Model: UserModel });
 router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(req.body.password, salt)
+    const username = req.body.username.trim();
 
-    if (await UserRepo.find({ username: req.body.username }, false)) {
+    if (await UserRepo.find({ username }, false)) {
         res.status(401).send({ error: "username is not available" })
         return;
     }
 
-    const user = await UserRepo.create({ username: req.body.username, password: hash });
-    const token = await generateJWT({ user }, { subject: req.body.username });
+    const user = await UserRepo.create({ username, password: hash });
+    const token = await generateJWT({ user }, { subject: username });
     res.status(201).set("Authorization", `Bearer ${token}`).send();
 });
 

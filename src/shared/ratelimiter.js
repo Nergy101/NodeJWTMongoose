@@ -1,6 +1,8 @@
 const redis = require("redis");
+const moment = require("moment");
 
 const chalk = require("chalk");
+const info = chalk.rgb(0, 0, 0).bgBlue;
 const fs = require("fs");
 const path = require("path");
 const redisURLParts = fs
@@ -13,16 +15,22 @@ const redisClient = redis.createClient({
   auth_pass: redisURLParts[2], // the redis's server pass
   no_ready_check: true,
 });
+
 redisClient.on("connect", () => {
   console.log(chalk.rgb(0, 0, 0).bgGreen("connected to redis"));
   redisClient.flushdb(function (err, succeeded) {
-    console.log(succeeded); // will be true if successfull
+    if (succeeded) {
+      console.log(info("Removed all Redis keys"))
+    }; // will be true if successfull
+    if (err) {
+      console.log(chalk.red("Error: " + err))
+    }
   });
 });
 redisClient.on("error", function (err) {
-  console.log(chalk.red("Error: " + err));
+  console.log(chalk.bgRed("Disconnected Redis Error: " + err));
+  console.log(chalk.red("Make sure to have a valid redis.key in the format: <ip>;<port>;<password>"))
 });
-const moment = require("moment");
 
 module.exports = async (req, res, next) => {
   redisClient.exists(req.user.username, (err, reply) => {
