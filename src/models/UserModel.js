@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     hidden: { type: Boolean, default: false },
     refreshToken: { type: String },
+    twoFactorAuthenticationEnabled: { type: Boolean, default: false },
     custom: { type: Object, default: {} },
     metadata: {
         registeredAt: { type: Date, default: Date.now },

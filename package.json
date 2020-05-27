@@ -23,7 +23,7 @@
     "ratelimiter"
   ],
   "author": {
-    "name":"Nergy101, Christian van Dijk",
+    "name": "Nergy101, Christian van Dijk",
     "email": "chrisdvd@live.nl"
   },
   "license": "ISC",
@@ -32,8 +32,10 @@
     "chalk": "^4.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
+    "keypair": "^1.0.1",
     "moment": "^2.25.3",
     "mongoose": "^5.9.11",
+    "node-2fa": "^1.1.2",
     "redis": "^3.0.2",
     "uuid": "^8.0.0"
   }

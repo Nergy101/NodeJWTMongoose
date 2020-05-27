@@ -24,22 +24,30 @@ mongoose.connect(mongoURL, {
   useNewUrlParser: true,
 });
 
+const MongooseRepository = require("./data/MongooseRepository.js");
+const FAInfoModel = require('./models/TwoFactorAuthenticationInfo.js');
+const FaInfoRepo = new MongooseRepository({ Model: FAInfoModel });
+const UserModel = require("./models/UserModel.js");
+const UserRepo = new MongooseRepository({ Model: UserModel });
+
+
+
 mongoose.connection.on("open", () => {
   console.log(chalk.rgb(0, 0, 0).bgGreen("connected to mongodb"));
   (async () => {
     users = await UserRepo.find();
-    users.forEach(async (user) => await UserRepo.remove(user));
+    users.forEach(async user => await UserRepo.remove(user));
     console.log(info("Removed all MongoDB users"));
+
+    fas = await  FaInfoRepo.find();
+    fas.forEach(async fa => await FaInfoRepo.remove(fa));
+    console.log(info("Removed all 2FA records"));
   })();
 });
 
 mongoose.connection.on("error", () => {
   console.log(chalk.bgRed("Disconnected MongoDB Error: " + err));
 });
-
-const UserModel = require("./models/UserModel.js");
-const MongooseRepository = require("./data/MongooseRepository.js");
-const UserRepo = new MongooseRepository({ Model: UserModel });
 
 
 
