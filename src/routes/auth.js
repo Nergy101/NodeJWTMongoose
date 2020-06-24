@@ -1,9 +1,12 @@
+const crypto = require("crypto");
 const express = require("express");
 const router = express.Router();
 
 const bcrypt = require("bcrypt");
 const saltRounds = 15;
 const twoFactor = require("node-2fa");
+
+const sendMail = require("../shared/email");
 
 // JWT
 const {
@@ -22,13 +25,14 @@ router.post("/register", async (req, res) => {
   const salt = await bcrypt.genSalt(saltRounds);
   const hash = await bcrypt.hash(req.body.password, salt);
   const username = req.body.username.trim();
+  const email = req.body.email.trim();
 
   if (await UserRepo.find({ username }, false)) {
     res.status(401).send({ error: "username is not available" });
     return;
   }
 
-  const user = await UserRepo.create({ username, password: hash });
+  const user = await UserRepo.create({ username, password: hash, email });
   const token = await generateJWT({ user }, { subject: username });
   res.status(201).set("Authorization", `Bearer ${token}`).send();
 });
@@ -140,6 +144,82 @@ router.post("/2fa", verifyToken, async (req, res) => {
     uri,
     qr,
   });
+});
+
+router.post("/forgotPassword", async (req, res) => {
+  // Get user based on email address
+  const email = req.body.email;
+  const user = await UserRepo.find({ email }, false);
+
+  if (!user) return res.status(400).json({ error: "Invalid email address! " });
+
+  // Generate password reset token
+  const resetToken = user.generatePasswordResetToken();
+
+  // Send email
+  const resetURL = `${req.protocol}://${req.get(
+    "host"
+  )}/auth/resetPassword/${resetToken}`;
+
+  try {
+    await sendMail({
+      to: email,
+      subject: "Password reset",
+      text: `Forgot your password? Submit a PATCH request with your new password to ${resetURL}\nIf you didn't forget your password, please ignore this email!`,
+    });
+  } catch (err) {
+    // Remove created token if email was not sent
+    if (user) {
+      await UserRepo.update(user, {
+        passwordResetToken: undefined,
+        passwordResetExpiration: undefined,
+      });
+    }
+
+    return res.status(401).send({
+      error:
+        "User does not exist or email could not be sent! Please try again.",
+    });
+  }
+
+  res.status(204).json();
+});
+
+router.patch("/resetPassword/:token", async (req, res) => {
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  // Check token validity and expiration
+  try {
+    const user = await UserRepo.find(
+      {
+        passwordResetToken: hashedToken,
+        passwordResetExpiration: { $gt: Date.now() },
+      },
+      false
+    );
+
+    if (!user) throw new Error("Invalid token");
+
+    // Update password
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hash = await bcrypt.hash(req.body.password, salt);
+    user.password = hash;
+    user.passwordResetToken = null;
+    user.passwordResetExpiration = null;
+
+    // Log in user
+    user.metadata.lastLogin = Date.now();
+    user.refreshToken = await generateRefreshToken();
+    await UserRepo.update(user, user);
+    const token = await generateJWT({ user }, { subject: user.username });
+    res.status(200).set("Authorization", `Bearer ${token}`).send();
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error });
+  }
 });
 
 module.exports = router;
