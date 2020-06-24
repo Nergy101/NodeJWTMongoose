@@ -16,7 +16,7 @@ try {
     "utf8"
   );
 } catch (err) {
-  console.log(chalk.red(err))
+  console.log(chalk.red(err));
   mongoURL = "mongodb://localhost:27017/test";
 }
 mongoose.connect(mongoURL, {
@@ -25,31 +25,27 @@ mongoose.connect(mongoURL, {
 });
 
 const MongooseRepository = require("./data/MongooseRepository.js");
-const FAInfoModel = require('./models/TwoFactorAuthenticationInfo.js');
+const FAInfoModel = require("./models/TwoFactorAuthenticationInfo.js");
 const FaInfoRepo = new MongooseRepository({ Model: FAInfoModel });
 const UserModel = require("./models/UserModel.js");
 const UserRepo = new MongooseRepository({ Model: UserModel });
-
-
 
 mongoose.connection.on("open", () => {
   console.log(chalk.rgb(0, 0, 0).bgGreen("connected to mongodb"));
   (async () => {
     users = await UserRepo.find();
-    users.forEach(async user => await UserRepo.remove(user));
+    users.forEach(async (user) => await UserRepo.remove(user));
     console.log(info("Removed all MongoDB users"));
 
-    fas = await  FaInfoRepo.find();
-    fas.forEach(async fa => await FaInfoRepo.remove(fa));
+    fas = await FaInfoRepo.find();
+    fas.forEach(async (fa) => await FaInfoRepo.remove(fa));
     console.log(info("Removed all 2FA records"));
   })();
 });
 
-mongoose.connection.on("error", () => {
+mongoose.connection.on("error", (err) => {
   console.log(chalk.bgRed("Disconnected MongoDB Error: " + err));
 });
-
-
 
 // const rateCheck = require("./shared/ratelimiter");
 // app.use(rateCheck);
@@ -87,4 +83,6 @@ app.use("/auth", authRoutes);
 const userRoutes = require("./routes/user.js");
 app.use("/user", userRoutes);
 
-app.listen(port, async () => console.log(chalk.rgb(0, 0, 0).bgCyan(`Listening on *: ${port}`)));
+app.listen(port, async () =>
+  console.log(chalk.rgb(0, 0, 0).bgCyan(`Listening on *: ${port}`))
+);
