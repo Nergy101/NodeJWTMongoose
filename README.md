@@ -13,6 +13,7 @@ Create a 'Keys' folder with:
 - public / private key (inside the 'public.key' and 'private.key' files)
 - Redis connection string (inside the 'redis.key' file)
 - Mongo connection string (inside the 'mongo.key' file)
+- Email connection data (inside the 'email.key' file)
 
 run the next line and it will auto-create a 'public.key' and 'private.key' inside the 'Keys' folder:
 
